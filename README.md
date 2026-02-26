@@ -1,9 +1,10 @@
-## VoyageX AI — Self-Hosting Guide
+# VoyageX AI — Self-Hosting Guide
 
 Host VoyageX AI on your ship computer or local server for offline access.
 
+---
 
-### System Requirements
+## Requirements
 
 | | Minimum | Recommended |
 |:--|:--|:--|
@@ -13,84 +14,93 @@ Host VoyageX AI on your ship computer or local server for offline access.
 | **Storage** | 5 GB SSD | 20 GB+ SSD |
 | **Browser** | Chrome 119+, Edge 119+ | Chrome latest |
 
-### Installation
+---
 
-**1 · Download the App**
+## Quick Start
 
-Download `web.zip` from the [latest release](https://github.com/voyagexai/app/releases/latest) and unzip:
+### 1. Install Node.js
 
+Download and install Node.js LTS from [nodejs.org](https://nodejs.org).
+
+> **Linux only**
+> ```bash
+> sudo apt update && sudo apt install -y nodejs npm
+> ```
+
+---
+
+### 2. Download the App
+
+**macOS / Linux**
 ```bash
-unzip web.zip
+cd ~/Downloads
+curl -L $(curl -s https://api.github.com/repos/voyagexai/app/releases/latest | grep "browser_download_url" | grep ".zip" | cut -d '"' -f 4) -o voyagex.zip
+unzip -o voyagex.zip
 ```
 
-You'll get a `web/` folder — this is the complete app.
-
-**2 · Install Node.js**
-
-Download **Node.js LTS** from [nodejs.org](https://nodejs.org) and install it.
-
-```bash
-node -v && npm -v   # verify install
+**Windows (PowerShell)**
+```powershell
+cd $HOME\Downloads
+$url = (Invoke-RestMethod https://api.github.com/repos/voyagexai/app/releases/latest).assets[0].browser_download_url
+Invoke-WebRequest $url -OutFile voyagex.zip
+Expand-Archive -Force voyagex.zip
 ```
 
-**3 · Start the Server**
+---
 
-Open **PowerShell** (Windows) or **Terminal** (macOS / Linux) in the folder containing `web/`:
+### 3. Start the Server
 
 ```bash
-npx serve web/ --set-headers "Cross-Origin-Opener-Policy=same-origin,Cross-Origin-Embedder-Policy=require-corp"
+npx serve voyagex/build/web/
 ```
 
-**4 · Open the App**
+---
 
-Open **Chrome** or **Edge** and go to `http://localhost:3000`
+### 4. Open in Browser
+
+Go to `http://localhost:3000` in Chrome or Edge.
 
 > [!NOTE]
-> The app runs entirely from your local machine — no internet required after first setup.
+> No internet required after first setup.
 
-### Onboard Network Access
+---
 
-Once the server is running, crew devices on the same network can access the app via the host computer's IP.
+## Onboard Access (LAN)
 
-**Find your local IP**
+Once the server is running, other devices on the same network can access the app.
 
+**Find your IP**
 ```bash
-ipconfig          # Windows  →  IPv4 Address
-ifconfig          # macOS / Linux  →  inet
+ipconfig getifaddr en0   # macOS
+hostname -I              # Linux
+ipconfig                 # Windows → IPv4 Address
 ```
 
-**Share this address with crew devices**
-
+**Open on any device**
 ```
 http://192.168.x.x:3000
 ```
 
-**Windows firewall** — allow port `3000`:
-
-```
-Settings → Windows Defender Firewall → Allow an app → Node.js
-```
-
 > [!IMPORTANT]
-> All devices must be on the same local network (LAN or Wi-Fi). No internet required.
+> Windows users may need to allow port `3000` in the firewall:
+> `Settings → Windows Defender Firewall → Allow an app → Node.js`
 
-### Updating
+---
+
+## Updating
+
+Stop the server and re-run from Step 2.
 
 ```bash
-# 1. Stop the server
 Ctrl + C
-
-# 2. Download latest web.zip → github.com/voyagexai/app/releases/latest
-# 3. Replace the web/ folder
-# 4. Restart
-npx serve web/ --set-headers "Cross-Origin-Opener-Policy=same-origin,Cross-Origin-Embedder-Policy=require-corp"
 ```
 
-### Troubleshooting
+---
+
+## Troubleshooting
 
 | Symptom | Fix |
 |:--|:--|
-| **Blank screen** | `F12` → Network → `index.html` → verify `Cross-Origin-Opener-Policy` and `Cross-Origin-Embedder-Policy` headers are present |
-| **Crew devices can't connect** | Allow port `3000` in firewall; confirm all devices are on the same network |
-| **App won't load** | Use Chrome 119+ or Edge 119+ — Firefox is not supported |
-| **WASM error** | Must be served from `localhost` or HTTPS — plain HTTP on a remote IP will not work |
+| **Blank screen** | `F12` → Network → `index.html` → check COOP/COEP headers |
+| **Can't connect from LAN** | Allow port `3000` in firewall; confirm same network |
+| **App won't load** | Use Chrome 119+ or Edge 119+ — Firefox not supported |
